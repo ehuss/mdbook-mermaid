@@ -1,7 +1,6 @@
 use clap::{crate_version, Arg, ArgMatches, Command};
-use mdbook::errors::Error;
-use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 use mdbook_mermaid::Mermaid;
+use mdbook_preprocessor::{errors::Error, Preprocessor};
 use toml_edit::{value, Array, Document, Item, Table, Value};
 
 use std::{
@@ -54,13 +53,13 @@ fn main() {
 }
 
 fn handle_preprocessing() -> Result<(), Error> {
-    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
+    let (ctx, book) = mdbook_preprocessor::parse_input(io::stdin())?;
 
-    if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
+    if ctx.mdbook_version != mdbook_preprocessor::MDBOOK_VERSION {
         eprintln!(
             "Warning: The mdbook-mermaid preprocessor was built against version \
              {} of mdbook, but we're being called from version {}",
-            mdbook::MDBOOK_VERSION,
+            mdbook_preprocessor::MDBOOK_VERSION,
             ctx.mdbook_version
         );
     }
@@ -75,7 +74,7 @@ fn handle_supports(sub_args: &ArgMatches) -> ! {
     let renderer = sub_args
         .get_one::<String>("renderer")
         .expect("Required argument");
-    let supported = Mermaid.supports_renderer(renderer);
+    let supported = Mermaid.supports_renderer(renderer).unwrap();
 
     // Signal whether the renderer is supported by exiting with 1 or 0.
     if supported {
